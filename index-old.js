@@ -29,7 +29,7 @@ app.get("/personagens/:id", function (req, res) {
   const item = lista[id];
 
   if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+    res.status(404).send("Chave 'nome' não foi encontrada no corpo da requisição");
 
     return;
   }
@@ -43,7 +43,7 @@ app.post("/personagens", function (req, res) {
   const item = req.body.nome;
 
   if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+    res.status(404).send("Chave 'nome' não foi encontrada no corpo da requisição");
 
     return;
   }
@@ -59,7 +59,7 @@ app.put("/personagens/:id", function (req, res) {
   const item = req.body.nome;
 
   if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+    res.status(404).send("Chave 'nome' não foi encontrada no corpo da requisição");
 
     return;
   }
