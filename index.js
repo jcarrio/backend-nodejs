@@ -1,35 +1,49 @@
 const express = require("express");
 const app = express();
 
-// Sinaliza ao Express que todo body da requisição
+// Sinalizamos para o Express que todo body da requisição
 // estará estruturado em JSON
 app.use(express.json());
 
 app.get("/", function (req, res) {
-  res.send("Olá mundo!");
+  res.send("Hello World");
 });
 
-// CRUD -> Create, Read (All & Single), Update, Delete
-// "CRUD" em memória
+// CRUD -> Create, Read (All & Single/byId), Update, Delete
+
+// "CRUD em memória"
 
 // Lista de textos (strings)
-const lista = ["Rick Sanchez", "Morty Smith"];
-//             0               1
+const lista = [
+  {
+    id: 1,
+    nome: "Rick Sanchez",
+  },
+  {
+    id: 2,
+    nome: "Morty Smith",
+  },
+];
 
 // [GET] /personagens
 // Read All
 app.get("/personagens", function (req, res) {
-  res.send(lista.filter(Boolean));
+  res.send(lista);
 });
 
-// [GET] /personagens/:id
-app.get("/personagens/:id", function (req, res) {
-  const id = req.params.id - 1;
+function findById(id) {
+  return lista.find((elemento) => elemento.id === id);
+}
 
-  const item = lista[id];
+// [GET] /personagens/:id
+// Read By Id
+app.get("/personagens/:id", function (req, res) {
+  const id = +req.params.id;  // + transforma em number
+
+  const item = findById(id);
 
   if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+    res.status(404).send("Personagem não encontrado.");
 
     return;
   }
@@ -38,46 +52,79 @@ app.get("/personagens/:id", function (req, res) {
 });
 
 // [POST] /personagens
+// Create
 app.post("/personagens", function (req, res) {
   // Obtém o corpo da requisição e coloca na variável item
-  const item = req.body.nome;
+  const item = req.body;
 
   if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+    res
+      .status(400)
+      .send("Chave 'nome' não foi encontrada no corpo da requisição.");
 
     return;
   }
 
-  lista.push(item);
+  item.id = lista.push(item);
 
-  res.status(201).send("Item adicionado com sucesso");
+  res.status(201).send(item);
 });
 
-// [PUT] /personagens
+// [PUT] /personagens/:id
+// Update
 app.put("/personagens/:id", function (req, res) {
-  const id = req.params.id - 1;
-  const item = req.body.nome;
+  /*
+    Objetivo: Atualizar uma personagem
+    Passos:
+    - Pegar o ID dessa personagem
+    - Pegar a nova informação que eu quero atualizar
+    - Atualizar essa nova informação na lista de personagens
+    - Exibir que deu certo
+    */
 
-  if (!item) {
-    res.status(404).send("Chave 'nome' não foi encontrada no corpor da requisição;")
+  const id = +req.params.id;
+
+  const itemEncontrado = findById(id);
+
+  if (!itemEncontrado) {
+    res.status(404).send("Personagem não encontrado.");
 
     return;
   }
-  
-  lista[id] = item;
 
-  res.send("Personagem atualizado com sucesso");
+  const novoItem = req.body;
+
+  if (!novoItem || !novoItem.nome) {
+    res
+      .status(400)
+      .send("Chave 'nome' não foi encontrada no corpo da requisição.");
+
+    return;
+  }
+
+  itemEncontrado = { ...novoItem };
+
+  res.send("Personagem atualizada com sucesso!");
 });
 
-// [DELETE] /personagens
+// [DELETE] /personagens/:id
+// Delete
 app.delete("/personagens/:id", function (req, res) {
-  const id = req.params.id - 1;
+  const id = +req.params.id;
 
-  delete lista[id];
-  //  lista.splice(id, 1);
-  // se existise (10, 50, 60), splice(1,1) deixaria (10, 60), e lista[1] seria 60, perdendo a posição
+  const itemEncontrado = findById(id);
 
-  res.send("Personagem removido com sucesso");
+  if (!itemEncontrado) {
+    res.status(404).send("Personagem não encontrado.");
+
+    return;
+  }
+
+  const index = lista.indexOf(itemEncontrado);
+
+  lista.splice(index, 1);
+
+  res.send("Personagem removida com sucesso!");
 });
 
 app.listen(3000);
